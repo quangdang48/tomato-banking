@@ -1,12 +1,26 @@
 # Tomato Banking — Documentation
 
-Portfolio banking REST API built with Spring Boot. This folder holds the design docs.
+Portfolio banking REST API built with Spring Boot. This folder holds the design docs and code conventions.
+
+### Design — [design/](design/)
 
 | Doc | What's inside |
 |-----|---------------|
-| [architecture.md](architecture.md) | Tech stack, layering, package layout, cross-cutting concerns (concurrency, idempotency, transactions, security). |
-| [database.md](database.md) | Data model, ER diagram, table definitions, indexes, migration strategy. |
-| [api.md](api.md) | REST endpoints, request/response contracts, error codes, status mapping. |
+| [design/architecture.md](design/architecture.md) | Tech stack, layering, package layout, cross-cutting concerns (concurrency, idempotency, transactions, security). |
+| [design/domain.md](design/domain.md) | Domain rules: money correctness, concurrency, idempotency, error handling, security. |
+| [design/database.md](design/database.md) | Data model, ER diagram, table definitions, indexes, migration strategy. |
+| [design/api.md](design/api.md) | REST endpoints, request/response contracts, error codes, status mapping. |
+
+### Code conventions — [code-convention/](code-convention/)
+
+| Doc | What's inside |
+|-----|---------------|
+| [code-convention/README.md](code-convention/README.md) | Index + non-negotiables. |
+| [code-convention/java.md](code-convention/java.md) | Naming, Lombok, DI, package layout. |
+| [code-convention/exception.md](code-convention/exception.md) | `ErrorCode`, `BusinessException`, `GlobalExceptionHandler`. |
+| [code-convention/layers.md](code-convention/layers.md) | Controller / service / repository / entity / DTO rules. |
+| [code-convention/banking.md](code-convention/banking.md) | Money, transactions, concurrency, idempotency. |
+| [code-convention/best-practices.md](code-convention/best-practices.md) | Security, validation, logging, testing, performance. |
 
 ## Quick facts
 
