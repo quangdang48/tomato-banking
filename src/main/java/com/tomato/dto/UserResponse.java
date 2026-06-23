@@ -1,6 +1,6 @@
-package com.dumy.dto;
+package com.tomato.dto;
 
-import com.dumy.entity.User;
+import com.tomato.entity.User;
 import lombok.Builder;
 import lombok.Getter;
 

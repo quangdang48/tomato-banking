@@ -1,8 +1,8 @@
-package com.dumy.service;
+package com.tomato.service;
 
-import com.dumy.dto.CreateUserRequest;
-import com.dumy.dto.UpdateUserRequest;
-import com.dumy.entity.User;
+import com.tomato.dto.CreateUserRequest;
+import com.tomato.dto.UpdateUserRequest;
+import com.tomato.entity.User;
 
 import java.util.List;
 

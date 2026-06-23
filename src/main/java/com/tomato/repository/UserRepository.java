@@ -1,6 +1,6 @@
-package com.dumy.repository;
+package com.tomato.repository;
 
-import com.dumy.entity.User;
+import com.tomato.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

@@ -1,4 +1,4 @@
-package com.dumy;
+package com.tomato;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

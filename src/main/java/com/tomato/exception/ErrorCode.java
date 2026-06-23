@@ -1,4 +1,4 @@
-package com.dumy.exception;
+package com.tomato.exception;
 
 public enum ErrorCode {
     SUCCESS(0, "Success"),

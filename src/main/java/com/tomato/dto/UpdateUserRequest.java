@@ -1,4 +1,4 @@
-package com.dumy.dto;
+package com.tomato.dto;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

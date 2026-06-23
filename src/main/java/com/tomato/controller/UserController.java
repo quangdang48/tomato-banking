@@ -1,10 +1,10 @@
-package com.dumy.controller;
+package com.tomato.controller;
 
-import com.dumy.common.ApiResponse;
-import com.dumy.dto.CreateUserRequest;
-import com.dumy.dto.UpdateUserRequest;
-import com.dumy.dto.UserResponse;
-import com.dumy.service.UserService;
+import com.tomato.common.ApiResponse;
+import com.tomato.dto.CreateUserRequest;
+import com.tomato.dto.UpdateUserRequest;
+import com.tomato.dto.UserResponse;
+import com.tomato.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;

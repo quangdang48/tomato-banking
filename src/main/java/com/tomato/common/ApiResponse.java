@@ -1,6 +1,6 @@
-package com.dumy.common;
+package com.tomato.common;
 
-import com.dumy.exception.ErrorCode;
+import com.tomato.exception.ErrorCode;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 

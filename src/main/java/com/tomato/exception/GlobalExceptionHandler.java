@@ -1,6 +1,6 @@
-package com.dumy.exception;
+package com.tomato.exception;
 
-import com.dumy.common.ApiResponse;
+import com.tomato.common.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;

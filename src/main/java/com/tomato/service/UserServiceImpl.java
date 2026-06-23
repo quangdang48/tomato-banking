@@ -1,11 +1,11 @@
-package com.dumy.service;
+package com.tomato.service;
 
-import com.dumy.dto.CreateUserRequest;
-import com.dumy.dto.UpdateUserRequest;
-import com.dumy.entity.User;
-import com.dumy.exception.ErrorCode;
-import com.dumy.exception.ObjectsValidator;
-import com.dumy.repository.UserRepository;
+import com.tomato.dto.CreateUserRequest;
+import com.tomato.dto.UpdateUserRequest;
+import com.tomato.entity.User;
+import com.tomato.exception.ErrorCode;
+import com.tomato.exception.ObjectsValidator;
+import com.tomato.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

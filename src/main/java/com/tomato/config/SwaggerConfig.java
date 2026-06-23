@@ -1,4 +1,4 @@
-package com.dumy.config;
+package com.tomato.config;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
@@ -12,8 +12,8 @@ public class SwaggerConfig {
     public OpenAPI openAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("Dumy API")
-                        .description("Dumy skeleton API documentation")
+                        .title("Tomato API")
+                        .description("Tomato API documentation")
                         .version("1.0.0"));
     }
 }

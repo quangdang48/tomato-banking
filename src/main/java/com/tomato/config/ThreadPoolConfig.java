@@ -1,4 +1,4 @@
-package com.dumy.config;
+package com.tomato.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
