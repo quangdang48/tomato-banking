@@ -36,6 +36,32 @@ Rules:
 
 ### Screen 1.1 - Register
 
+Screen data:
+
+```json
+{
+  "initialForm": {
+    "username": "",
+    "email": "",
+    "password": "",
+    "confirmPassword": ""
+  },
+  "demoInput": {
+    "username": "quanghd_99",
+    "email": "quang.ha@student.hcmute.edu.vn",
+    "fullName": "HA DANG QUANG",
+    "password": "secret123",
+    "confirmPassword": "secret123"
+  },
+  "expectedResponse": {
+    "id": 1001,
+    "username": "quanghd_99",
+    "email": "quang.ha@student.hcmute.edu.vn",
+    "fullName": "HA DANG QUANG"
+  }
+}
+```
+
 Purpose: create the system identity used for login and ownership.
 
 ```text
@@ -71,6 +97,29 @@ Notes:
 
 ### Screen 1.2 - Choose Profile Type
 
+Screen data:
+
+```json
+{
+  "display": {
+    "userId": 1001,
+    "availableCustomerTypes": [
+      { "value": "INDIVIDUAL", "label": "Individual account" },
+      { "value": "BUSINESS", "label": "Business account" }
+    ],
+    "selectedCustomerType": "INDIVIDUAL"
+  },
+  "submitPayload": {
+    "customerType": "INDIVIDUAL"
+  },
+  "expectedResponse": {
+    "profileId": 2001,
+    "customerType": "INDIVIDUAL",
+    "status": "DRAFT"
+  }
+}
+```
+
 Purpose: initialize the legal onboarding profile after login.
 
 ```text
@@ -105,6 +154,51 @@ Phase behavior:
 - Phase 2 enables `BUSINESS`.
 
 ### Screen 1.3 - Individual KYC
+
+Screen data:
+
+```json
+{
+  "display": {
+    "profileId": 2001,
+    "customerType": "INDIVIDUAL",
+    "status": "DRAFT",
+    "documentTypes": ["CCCD", "PASSPORT"],
+    "provinceCityOptions": ["Ho Chi Minh City", "Ha Noi", "Da Nang"],
+    "districtOptions": ["Thu Duc", "District 1", "District 3"]
+  },
+  "kycPayload": {
+    "legalName": "HA DANG QUANG",
+    "dateOfBirth": "1999-12-25",
+    "documentType": "CCCD",
+    "documentNumber": "079201001234",
+    "streetAddress": "1 Vo Van Ngan",
+    "district": "Thu Duc",
+    "provinceCity": "Ho Chi Minh City"
+  },
+  "documentPayloads": [
+    {
+      "documentType": "CCCD_FRONT",
+      "storageKey": "demo/kyc/2001/cccd-front.png",
+      "originalFilename": "cccd-front.png",
+      "contentType": "image/png",
+      "sizeBytes": 245000
+    },
+    {
+      "documentType": "CCCD_BACK",
+      "storageKey": "demo/kyc/2001/cccd-back.png",
+      "originalFilename": "cccd-back.png",
+      "contentType": "image/png",
+      "sizeBytes": 238000
+    }
+  ],
+  "expectedSubmitResponse": {
+    "profileId": 2001,
+    "customerType": "INDIVIDUAL",
+    "status": "SUBMITTED"
+  }
+}
+```
 
 Purpose: collect Vietnam-focused personal identity data and CCCD/passport document
 metadata.
@@ -161,6 +255,37 @@ This branch starts when the user chooses `BUSINESS` on the profile-type screen.
 
 ### Screen 2.1 - Business KYB
 
+Screen data:
+
+```json
+{
+  "display": {
+    "profileId": 2002,
+    "customerType": "BUSINESS",
+    "status": "DRAFT",
+    "provinceCityOptions": ["Ho Chi Minh City", "Ha Noi", "Da Nang"],
+    "districtOptions": ["District 1", "District 3", "Thu Duc"]
+  },
+  "kybPayload": {
+    "legalBusinessName": "CONG TY TNHH CONG NGHE NAYAMI",
+    "registrationNumber": "0312345678",
+    "taxId": "0312345678",
+    "incorporationDate": "2020-01-15",
+    "businessAddressLine1": "123 Le Loi",
+    "district": "District 1",
+    "provinceCity": "Ho Chi Minh City",
+    "industry": "FINTECH"
+  },
+  "documentPayload": {
+    "documentType": "BUSINESS_REGISTRATION",
+    "storageKey": "demo/kyb/2002/gpkd-nayami.pdf",
+    "originalFilename": "gpkd_nayami.pdf",
+    "contentType": "application/pdf",
+    "sizeBytes": 1200000
+  }
+}
+```
+
 Purpose: collect company identity, Vietnam tax/registration data, address, and business
 registration document metadata.
 
@@ -201,6 +326,45 @@ Validation:
 - Required address fields: `provinceCity`, `district`, `businessAddressLine1`.
 
 ### Screen 2.2 - Beneficial Owners
+
+Screen data:
+
+```json
+{
+  "display": {
+    "kybVerificationId": 5001,
+    "owners": [
+      {
+        "ownerId": 6001,
+        "legalName": "NGUYEN VAN A",
+        "ownershipPercentage": 51.00,
+        "documentMasked": "079201******",
+        "hasDocument": true
+      }
+    ]
+  },
+  "addOwnerPayload": {
+    "legalName": "TRAN THI B",
+    "dateOfBirth": "1992-05-20",
+    "ownershipPercentage": 30.00,
+    "documentType": "CCCD",
+    "documentNumber": "079202005678"
+  },
+  "ownerDocumentPayload": {
+    "ownerId": 6002,
+    "documentType": "OWNER_CCCD_FRONT",
+    "storageKey": "demo/kyb/2002/owners/6002/cccd-front.png",
+    "originalFilename": "owner-cccd-front.png",
+    "contentType": "image/png",
+    "sizeBytes": 230000
+  },
+  "expectedSubmitResponse": {
+    "profileId": 2002,
+    "customerType": "BUSINESS",
+    "status": "SUBMITTED"
+  }
+}
+```
 
 Purpose: collect ultimate beneficial owner information for shareholders/owners with
 significant ownership.
@@ -251,6 +415,45 @@ Validation:
 
 ### Screen A.1 - Onboarding Review
 
+Screen data:
+
+```json
+{
+  "queueItem": {
+    "profileId": 2001,
+    "customerType": "INDIVIDUAL",
+    "legalName": "HA DANG QUANG",
+    "status": "SUBMITTED",
+    "riskLevel": "LOW",
+    "submittedAt": "2026-06-24T09:30:00Z"
+  },
+  "reviewDetail": {
+    "profileId": 2001,
+    "customerType": "INDIVIDUAL",
+    "status": "IN_REVIEW",
+    "riskLevel": "LOW",
+    "kyc": {
+      "legalName": "HA DANG QUANG",
+      "dateOfBirth": "1999-12-25",
+      "documentType": "CCCD",
+      "documentNumber": "079201001234",
+      "streetAddress": "1 Vo Van Ngan",
+      "district": "Thu Duc",
+      "provinceCity": "Ho Chi Minh City"
+    },
+    "documents": [
+      { "documentType": "CCCD_FRONT", "status": "UPLOADED" },
+      { "documentType": "CCCD_BACK", "status": "UPLOADED" }
+    ]
+  },
+  "approvePayload": {
+    "decision": "APPROVED",
+    "riskLevel": "LOW",
+    "reason": "Verified manually"
+  }
+}
+```
+
 Purpose: internal review screen for approving, rejecting, or requesting more information.
 
 ```text
@@ -294,6 +497,57 @@ Status outcomes:
 ## Phase 3 - Banking Core
 
 ### Screen 3.1 - Account Dashboard
+
+Screen data:
+
+```json
+{
+  "display": {
+    "user": {
+      "id": 1001,
+      "fullName": "HA DANG QUANG"
+    },
+    "onboarding": {
+      "profileId": 2001,
+      "status": "APPROVED",
+      "displayStatus": "VERIFIED"
+    },
+    "account": {
+      "accountId": 8001,
+      "accountNumber": "10223456789",
+      "status": "ACTIVE",
+      "balance": 15250000.0000,
+      "currency": "VND"
+    },
+    "recentTransactions": [
+      {
+        "transactionId": 9001,
+        "type": "DEPOSIT",
+        "amount": 5000000.0000,
+        "balanceAfter": 17250000.0000,
+        "referenceId": "DEP83742",
+        "createdAt": "2026-06-24T09:45:00Z"
+      },
+      {
+        "transactionId": 9002,
+        "type": "WITHDRAW",
+        "amount": 2000000.0000,
+        "balanceAfter": 15250000.0000,
+        "referenceId": "WTH11204",
+        "createdAt": "2026-06-23T14:20:00Z"
+      }
+    ]
+  },
+  "depositPayload": {
+    "amount": 5000000.0000,
+    "referenceId": "DEP83742"
+  },
+  "withdrawPayload": {
+    "amount": 2000000.0000,
+    "referenceId": "WTH11204"
+  }
+}
+```
 
 Purpose: show the approved user's account, balance, and recent transaction history.
 
@@ -346,384 +600,3 @@ Rules:
 
 ---
 
-## Screen Data Fixtures
-
-Use these fixtures to demo or test each UI screen. They describe what the screen displays,
-what the user submits, and what backend state is expected after the action.
-
-### Screen 1.1 - Register
-
-Initial form:
-
-```json
-{
-  "username": "",
-  "email": "",
-  "password": "",
-  "confirmPassword": ""
-}
-```
-
-Demo input:
-
-```json
-{
-  "username": "quanghd_99",
-  "email": "quang.ha@student.hcmute.edu.vn",
-  "fullName": "HA DANG QUANG",
-  "password": "secret123",
-  "confirmPassword": "secret123"
-}
-```
-
-Expected response data:
-
-```json
-{
-  "id": 1001,
-  "username": "quanghd_99",
-  "email": "quang.ha@student.hcmute.edu.vn",
-  "fullName": "HA DANG QUANG"
-}
-```
-
-Backend state:
-
-| Table | Key fields |
-|-------|------------|
-| `users` | `id=1001`, `username=quanghd_99`, `email=quang.ha@student.hcmute.edu.vn`, `password_hash=<bcrypt>` |
-
-### Screen 1.2 - Choose Profile Type
-
-Display data:
-
-```json
-{
-  "userId": 1001,
-  "availableCustomerTypes": [
-    { "value": "INDIVIDUAL", "label": "Individual account", "enabledInPhase": 1 },
-    { "value": "BUSINESS", "label": "Business account", "enabledInPhase": 2 }
-  ],
-  "selectedCustomerType": "INDIVIDUAL"
-}
-```
-
-Submit payload:
-
-```json
-{
-  "customerType": "INDIVIDUAL"
-}
-```
-
-Expected response data:
-
-```json
-{
-  "profileId": 2001,
-  "customerType": "INDIVIDUAL",
-  "status": "DRAFT"
-}
-```
-
-Backend state:
-
-| Table | Key fields |
-|-------|------------|
-| `customer_profiles` | `id=2001`, `user_id=1001`, `customer_type=INDIVIDUAL`, `status=DRAFT`, `risk_level=LOW` |
-
-### Screen 1.3 - Individual KYC
-
-Display data:
-
-```json
-{
-  "profileId": 2001,
-  "customerType": "INDIVIDUAL",
-  "status": "DRAFT",
-  "documentTypes": ["CCCD", "PASSPORT"],
-  "provinceCityOptions": ["Ho Chi Minh City", "Ha Noi", "Da Nang"],
-  "districtOptions": ["Thu Duc", "District 1", "District 3"]
-}
-```
-
-KYC submit payload:
-
-```json
-{
-  "legalName": "HA DANG QUANG",
-  "dateOfBirth": "1999-12-25",
-  "documentType": "CCCD",
-  "documentNumber": "079201001234",
-  "streetAddress": "1 Vo Van Ngan",
-  "district": "Thu Duc",
-  "provinceCity": "Ho Chi Minh City"
-}
-```
-
-Document payloads:
-
-```json
-[
-  {
-    "documentType": "CCCD_FRONT",
-    "storageKey": "demo/kyc/2001/cccd-front.png",
-    "originalFilename": "cccd-front.png",
-    "contentType": "image/png",
-    "sizeBytes": 245000
-  },
-  {
-    "documentType": "CCCD_BACK",
-    "storageKey": "demo/kyc/2001/cccd-back.png",
-    "originalFilename": "cccd-back.png",
-    "contentType": "image/png",
-    "sizeBytes": 238000
-  }
-]
-```
-
-Expected backend state before submit:
-
-| Table | Key fields |
-|-------|------------|
-| `kyc_verifications` | `profile_id=2001`, `document_type=CCCD`, `document_number=079201001234`, `status=PENDING` |
-| `verification_documents` | `profile_id=2001`, `document_type=CCCD_FRONT/CCCD_BACK`, `status=UPLOADED` |
-
-Expected backend state after `POST /api/onboarding/submit`:
-
-| Table | Key fields |
-|-------|------------|
-| `customer_profiles` | `id=2001`, `status=SUBMITTED`, `submitted_at=<now>` |
-| `onboarding_audit_logs` | `profile_id=2001`, `action=SUBMIT_INDIVIDUAL_KYC`, `old_status=DRAFT`, `new_status=SUBMITTED` |
-
-### Screen 2.1 - Business KYB
-
-Display data:
-
-```json
-{
-  "profileId": 2002,
-  "customerType": "BUSINESS",
-  "status": "DRAFT",
-  "provinceCityOptions": ["Ho Chi Minh City", "Ha Noi", "Da Nang"],
-  "districtOptions": ["District 1", "District 3", "Thu Duc"]
-}
-```
-
-KYB submit payload:
-
-```json
-{
-  "legalBusinessName": "CONG TY TNHH CONG NGHE NAYAMI",
-  "registrationNumber": "0312345678",
-  "taxId": "0312345678",
-  "incorporationDate": "2020-01-15",
-  "businessAddressLine1": "123 Le Loi",
-  "district": "District 1",
-  "provinceCity": "Ho Chi Minh City",
-  "industry": "FINTECH"
-}
-```
-
-Business document payload:
-
-```json
-{
-  "documentType": "BUSINESS_REGISTRATION",
-  "storageKey": "demo/kyb/2002/gpkd-nayami.pdf",
-  "originalFilename": "gpkd_nayami.pdf",
-  "contentType": "application/pdf",
-  "sizeBytes": 1200000
-}
-```
-
-Expected backend state:
-
-| Table | Key fields |
-|-------|------------|
-| `kyb_verifications` | `id=5001`, `profile_id=2002`, `tax_id=0312345678`, `status=PENDING` |
-| `verification_documents` | `profile_id=2002`, `document_type=BUSINESS_REGISTRATION`, `status=UPLOADED` |
-
-### Screen 2.2 - Beneficial Owners
-
-Display data:
-
-```json
-{
-  "kybVerificationId": 5001,
-  "owners": [
-    {
-      "ownerId": 6001,
-      "legalName": "NGUYEN VAN A",
-      "ownershipPercentage": 51.00,
-      "documentMasked": "079201******",
-      "hasDocument": true
-    }
-  ]
-}
-```
-
-Add-owner payload:
-
-```json
-{
-  "legalName": "TRAN THI B",
-  "dateOfBirth": "1992-05-20",
-  "ownershipPercentage": 30.00,
-  "documentType": "CCCD",
-  "documentNumber": "079202005678"
-}
-```
-
-Owner document payload:
-
-```json
-{
-  "ownerId": 6002,
-  "documentType": "OWNER_CCCD_FRONT",
-  "storageKey": "demo/kyb/2002/owners/6002/cccd-front.png",
-  "originalFilename": "owner-cccd-front.png",
-  "contentType": "image/png",
-  "sizeBytes": 230000
-}
-```
-
-Expected backend state before submit:
-
-| Table | Key fields |
-|-------|------------|
-| `beneficial_owners` | `kyb_verification_id=5001`, `legal_name=TRAN THI B`, `ownership_percentage=30.00`, `status=PENDING` |
-| `verification_documents` | `profile_id=2002`, `owner_id=6002`, `document_type=OWNER_CCCD_FRONT`, `status=UPLOADED` |
-
-Expected backend state after business submit:
-
-| Table | Key fields |
-|-------|------------|
-| `customer_profiles` | `id=2002`, `status=SUBMITTED`, `submitted_at=<now>` |
-| `onboarding_audit_logs` | `profile_id=2002`, `action=SUBMIT_BUSINESS_KYB`, `old_status=DRAFT`, `new_status=SUBMITTED` |
-
-### Screen A.1 - Onboarding Review
-
-Queue item data:
-
-```json
-{
-  "profileId": 2001,
-  "customerType": "INDIVIDUAL",
-  "legalName": "HA DANG QUANG",
-  "status": "SUBMITTED",
-  "riskLevel": "LOW",
-  "submittedAt": "2026-06-24T09:30:00Z"
-}
-```
-
-Review detail data:
-
-```json
-{
-  "profileId": 2001,
-  "customerType": "INDIVIDUAL",
-  "status": "IN_REVIEW",
-  "riskLevel": "LOW",
-  "kyc": {
-    "legalName": "HA DANG QUANG",
-    "dateOfBirth": "1999-12-25",
-    "documentType": "CCCD",
-    "documentNumber": "079201001234",
-    "streetAddress": "1 Vo Van Ngan",
-    "district": "Thu Duc",
-    "provinceCity": "Ho Chi Minh City"
-  },
-  "documents": [
-    { "documentType": "CCCD_FRONT", "status": "UPLOADED" },
-    { "documentType": "CCCD_BACK", "status": "UPLOADED" }
-  ]
-}
-```
-
-Approve payload:
-
-```json
-{
-  "decision": "APPROVED",
-  "riskLevel": "LOW",
-  "reason": "Verified manually"
-}
-```
-
-Expected backend state:
-
-| Table | Key fields |
-|-------|------------|
-| `customer_profiles` | `id=2001`, `status=APPROVED`, `risk_level=LOW`, `reviewed_at=<now>` |
-| `kyc_verifications` | `profile_id=2001`, `status=VERIFIED` |
-| `verification_documents` | `profile_id=2001`, `status=ACCEPTED` |
-| `onboarding_audit_logs` | `profile_id=2001`, `action=APPROVE_INDIVIDUAL_KYC`, `old_status=IN_REVIEW`, `new_status=APPROVED` |
-
-### Screen 3.1 - Account Dashboard
-
-Display data:
-
-```json
-{
-  "user": {
-    "id": 1001,
-    "fullName": "HA DANG QUANG"
-  },
-  "onboarding": {
-    "profileId": 2001,
-    "status": "APPROVED",
-    "displayStatus": "VERIFIED"
-  },
-  "account": {
-    "accountId": 8001,
-    "accountNumber": "10223456789",
-    "status": "ACTIVE",
-    "balance": 15250000.0000,
-    "currency": "VND"
-  },
-  "recentTransactions": [
-    {
-      "transactionId": 9001,
-      "type": "DEPOSIT",
-      "amount": 5000000.0000,
-      "balanceAfter": 17250000.0000,
-      "referenceId": "DEP83742",
-      "createdAt": "2026-06-24T09:45:00Z"
-    },
-    {
-      "transactionId": 9002,
-      "type": "WITHDRAW",
-      "amount": 2000000.0000,
-      "balanceAfter": 15250000.0000,
-      "referenceId": "WTH11204",
-      "createdAt": "2026-06-23T14:20:00Z"
-    }
-  ]
-}
-```
-
-Deposit payload:
-
-```json
-{
-  "amount": 5000000.0000,
-  "referenceId": "DEP83742"
-}
-```
-
-Withdraw payload:
-
-```json
-{
-  "amount": 2000000.0000,
-  "referenceId": "WTH11204"
-}
-```
-
-Expected backend state:
-
-| Table | Key fields |
-|-------|------------|
-| `accounts` | `id=8001`, `balance=15250000.0000`, `currency=VND`, `status=ACTIVE` |
-| `transactions` | rows for `DEP83742` and `WTH11204`, each with `status=COMPLETED` |
