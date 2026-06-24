@@ -41,3 +41,23 @@ All responses wrapped in `ApiResponse` for a uniform `{ code, message, data }` s
 - Stateless JWT. `POST /api/auth/login` issues token; filter validates on each request.
 - Account endpoints scoped to the authenticated owner — user A cannot touch user B's account.
 - Passwords stored as bcrypt hash (`password_hash`), never plaintext.
+
+## Onboarding (KYC / KYB)
+
+Onboarding verifies whether an authenticated user is allowed to bank. Keep it separate
+from account and transaction logic, but enforce its decision before account activation and
+money movement.
+
+- Individual customers complete **KYC**.
+- Business customers complete **KYB** and provide beneficial owners.
+- One `CustomerProfile` belongs to one `User` in this phase.
+- Profile status flow: `DRAFT` → `SUBMITTED` → `IN_REVIEW` → `APPROVED` / `REJECTED` /
+  `REQUIRES_MORE_INFO`.
+- Customers may edit onboarding data only in `DRAFT` or `REQUIRES_MORE_INFO`.
+- Account creation and deposit/withdraw require onboarding status `APPROVED`.
+- Every onboarding status transition writes an audit log row.
+- Do not expose sensitive identity fields, document numbers, tax IDs, or storage keys in
+  public responses.
+
+Detailed implementation plan: [phase-2-onboarding-kyc-kyb.md](../implementation/phase-2-onboarding-kyc-kyb.md).
+Delivery sequence: [phased-delivery-plan.md](../implementation/phased-delivery-plan.md).

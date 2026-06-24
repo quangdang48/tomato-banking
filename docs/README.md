@@ -10,6 +10,15 @@ Portfolio banking REST API built with Spring Boot. This folder holds the design 
 | [design/domain.md](design/domain.md) | Domain rules: money correctness, concurrency, idempotency, error handling, security. |
 | [design/database.md](design/database.md) | Data model, ER diagram, table definitions, indexes, migration strategy. |
 | [design/api.md](design/api.md) | REST endpoints, request/response contracts, error codes, status mapping. |
+| [design/ui-flow.md](design/ui-flow.md) | Text UI wireframes and screen-to-API/table mapping from registration through banking. |
+
+### Implementation — [implementation/](implementation/)
+
+| Doc | What's inside |
+|-----|---------------|
+| [implementation/phased-delivery-plan.md](implementation/phased-delivery-plan.md) | Three-phase delivery plan: auth + individual eKYC, KYB extension, then banking core. |
+| [implementation/phase-1-auth-jwt.md](implementation/phase-1-auth-jwt.md) | Roadmap item 5: JWT auth — register/login, token sign+validate, security filter chain, error codes, files, tests. |
+| [implementation/phase-2-onboarding-kyc-kyb.md](implementation/phase-2-onboarding-kyc-kyb.md) | Customer onboarding: KYC/KYB profile, beneficial owners, document metadata, review workflow, audit logs, account gating. |
 
 ### Code conventions — [code-convention/](code-convention/)
 
@@ -35,14 +44,13 @@ Portfolio banking REST API built with Spring Boot. This folder holds the design 
 
 ## Roadmap
 
-1. Setup project + entities + repositories + migration
-2. Basic account CRUD (no auth yet)
-3. Deposit / withdraw + balance logic + validation
+1. Base auth + individual eKYC (`V1__auth_and_kyc.sql`)
+2. Business onboarding / KYB extension (`V2__kyb_extension.sql`)
+3. Banking core + transaction processing (`V3__banking_core.sql`)
 4. Concurrency handling (race-condition tests)
-5. Auth (JWT) + per-user endpoint protection
-6. Standard exception handling (400 / 404 / 409 / 422)
-7. Unit + integration tests (Testcontainers + Postgres)
-8. Swagger docs + README polish
+5. Standard exception handling (400 / 401 / 403 / 404 / 409 / 422)
+6. Unit + integration tests (Testcontainers + Postgres)
+7. Swagger docs + README polish
 
 ## Current state
 

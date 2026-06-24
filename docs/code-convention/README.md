@@ -17,3 +17,5 @@ Rules derived from the actual codebase. New code must follow these or update the
 - All HTTP responses use the `ApiResponse<T>` envelope.
 - Throw `BusinessException(ErrorCode)` from service layer; never map to HTTP status manually in a service.
 - Use `BigDecimal` for all money amounts. Never `double` or `float`.
+- Onboarding status checks live in services; account/money operations call the onboarding gate instead of duplicating KYC/KYB rules.
+- Never expose sensitive KYC/KYB fields or document storage keys in public DTOs.

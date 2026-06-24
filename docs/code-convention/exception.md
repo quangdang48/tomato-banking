@@ -54,6 +54,20 @@ Planned banking codes (per `docs/api.md`):
 | 2104 | Account not owned by caller | 403 |
 | 2105 | Account not ACTIVE | 409 |
 
+Planned onboarding codes:
+
+| code | Meaning | HTTP |
+|------|---------|------|
+| 2300 | Onboarding profile not found | 404 |
+| 2301 | Onboarding profile already exists | 409 |
+| 2302 | Onboarding is not approved | 403 |
+| 2303 | Required KYC data is missing | 400 |
+| 2304 | Required KYB data is missing | 400 |
+| 2305 | Required document is missing | 400 |
+| 2306 | Invalid onboarding status transition | 409 |
+| 2307 | Beneficial owner is required | 400 |
+| 2308 | Onboarding has been rejected | 409 |
+
 ---
 
 ## 2. `BusinessException`
