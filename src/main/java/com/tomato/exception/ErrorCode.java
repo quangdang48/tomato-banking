@@ -18,6 +18,7 @@ public enum ErrorCode {
     ERROR_409_2306(2306, "Invalid onboarding status transition"),
     ERROR_400_2307(2307, "Beneficial owner is required"),
     ERROR_409_2308(2308, "Onboarding has been rejected"),
+    ERROR_403_2309(2309, "Reviewer access required"),
     ERROR_500_5000(5000, "Internal server error");
 
     private final int code;

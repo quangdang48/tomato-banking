@@ -20,7 +20,7 @@ public class GlobalExceptionHandler {
 
         HttpStatus status = switch (errorCode) {
             case ERROR_401_2200, ERROR_401_2201 -> HttpStatus.UNAUTHORIZED;
-            case ERROR_403_2302 -> HttpStatus.FORBIDDEN;
+            case ERROR_403_2302, ERROR_403_2309 -> HttpStatus.FORBIDDEN;
             case ERROR_404_2001, ERROR_404_2300 -> HttpStatus.NOT_FOUND;
             case ERROR_409_2002, ERROR_409_2003, ERROR_409_2301, ERROR_409_2306, ERROR_409_2308 -> HttpStatus.CONFLICT;
             default -> HttpStatus.BAD_REQUEST;

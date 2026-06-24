@@ -23,21 +23,21 @@
 
 ## 5. OnboardingService (customer workflow)
 
-- [ ] 5.1 Add `OnboardingService` interface and implementation: `createProfile` (rejects duplicates), `getProfile`, `upsertKyc`, `addDocument`, `submit`, `requireApproved`.
-- [ ] 5.2 Enforce `customerType == INDIVIDUAL` for KYC operations and editable-state (`DRAFT`/`REQUIRES_MORE_INFO`) for all mutations.
-- [ ] 5.3 Add a central status-transition guard that throws `ERROR_409_2306` on illegal transitions.
-- [ ] 5.4 Implement `submit` validation: required KYC fields (`ERROR_400_2303`) and at least one identity document (`ERROR_400_2305`); move to `SUBMITTED` and set `submittedAt`.
-- [ ] 5.5 Implement `requireApproved` to throw `ERROR_403_2302` unless status is `APPROVED`.
-- [ ] 5.6 Write an `onboarding_audit_logs` row in the same transaction as every status transition.
+- [x] 5.1 Add `OnboardingService` interface and implementation: `createProfile` (rejects duplicates), `getProfile`, `upsertKyc`, `addDocument`, `submit`, `requireApproved`.
+- [x] 5.2 Enforce `customerType == INDIVIDUAL` for KYC operations and editable-state (`DRAFT`/`REQUIRES_MORE_INFO`) for all mutations.
+- [x] 5.3 Add a central status-transition guard that throws `ERROR_409_2306` on illegal transitions.
+- [x] 5.4 Implement `submit` validation: required KYC fields (`ERROR_400_2303`) and at least one identity document (`ERROR_400_2305`); move to `SUBMITTED` and set `submittedAt`.
+- [x] 5.5 Implement `requireApproved` to throw `ERROR_403_2302` unless status is `APPROVED`.
+- [x] 5.6 Write an `onboarding_audit_logs` row in the same transaction as every status transition.
 
 ## 6. Customer Controller
 
-- [ ] 6.1 Add onboarding controller for `POST /profile`, `GET /status`, `PUT /kyc`, `POST /documents`, `POST /submit`, all resolving the profile from the authenticated principal and wrapping responses in `ApiResponse<T>`.
+- [x] 6.1 Add onboarding controller for `POST /profile`, `GET /status`, `PUT /kyc`, `POST /documents`, `POST /submit`, all resolving the profile from the authenticated principal and wrapping responses in `ApiResponse<T>`.
 
 ## 7. Reviewer Workflow
 
-- [ ] 7.1 Add `OnboardingReviewService` interface and implementation: `listReviews(status, Pageable)`, `startReview` (`SUBMITTED→IN_REVIEW`), `decide` (`IN_REVIEW→APPROVED/REJECTED/REQUIRES_MORE_INFO`), requiring `reason` on reject/more-info and writing an audit row per decision.
-- [ ] 7.2 Add reviewer controller under `/api/admin/onboarding/**` behind a temporary admin gate (queue list, review detail, start, decision).
+- [x] 7.1 Add `OnboardingReviewService` interface and implementation: `listReviews(status, Pageable)`, `startReview` (`SUBMITTED→IN_REVIEW`), `decide` (`IN_REVIEW→APPROVED/REJECTED/REQUIRES_MORE_INFO`), requiring `reason` on reject/more-info and writing an audit row per decision.
+- [x] 7.2 Add reviewer controller under `/api/admin/onboarding/**` behind a temporary admin gate (queue list, review detail, start, decision).
 
 ## 8. Banking Gate Integration
 
