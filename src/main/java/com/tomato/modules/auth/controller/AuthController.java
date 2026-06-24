@@ -4,8 +4,8 @@ import com.tomato.common.ApiResponse;
 import com.tomato.modules.auth.dto.request.LoginRequest;
 import com.tomato.modules.auth.dto.request.RegisterRequest;
 import com.tomato.modules.auth.dto.response.AuthResponse;
+import com.tomato.modules.auth.dto.response.RegistrationResponseDto;
 import com.tomato.modules.auth.service.AuthService;
-import com.tomato.modules.user.dto.response.UserResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -33,9 +33,8 @@ public class AuthController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Validation failed"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "409", description = "Username or email already in use")
     })
-    public ResponseEntity<ApiResponse<UserResponse>> register(@Valid @RequestBody RegisterRequest request) {
-        UserResponse response = UserResponse.from(authService.register(request));
-        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(response));
+    public ResponseEntity<ApiResponse<RegistrationResponseDto>> register(@Valid @RequestBody RegisterRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(authService.register(request)));
     }
 
     @PostMapping("/login")

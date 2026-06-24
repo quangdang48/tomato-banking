@@ -6,6 +6,7 @@ import com.tomato.exception.ErrorCode;
 import com.tomato.modules.auth.dto.request.LoginRequest;
 import com.tomato.modules.auth.dto.request.RegisterRequest;
 import com.tomato.modules.auth.dto.response.AuthResponse;
+import com.tomato.modules.auth.dto.response.RegistrationResponseDto;
 import com.tomato.modules.user.dto.request.CreateUserRequest;
 import com.tomato.modules.user.entity.User;
 import com.tomato.modules.user.repository.UserRepository;
@@ -27,13 +28,14 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public User register(RegisterRequest request) {
-        return userService.createUser(new CreateUserRequest(
+    public RegistrationResponseDto register(RegisterRequest request) {
+        User user = userService.createUser(new CreateUserRequest(
                 request.username(),
                 request.email(),
                 request.fullName(),
                 request.password()
         ));
+        return RegistrationResponseDto.from(user);
     }
 
     @Override
