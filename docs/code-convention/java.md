@@ -34,10 +34,12 @@ Dependency direction is one-way inside each module: `controller → service → 
 | Method                | camelCase, verb-first      | `getUserById`, `createUser`  |
 | Variable / field      | camelCase                  | `passwordHash`               |
 | Constant / enum entry | UPPER_SNAKE                | `ERROR_404_2001`             |
-| DB table              | snake_case, plural         | `users`, `accounts`          |
+| DB table              | `tbl_` prefix, snake_case, plural | `tbl_users`, `tbl_accounts` |
 | DB column             | snake_case                 | `full_name`, `password_hash` |
 | Package               | all lowercase              | `com.tomato.modules.user.service` |
 | Boolean method        | `is`/`has`/`exists` prefix | `existsByUsername`           |
+
+Every physical table name is prefixed with `tbl_` (e.g. entity `User` → `@Table(name = "tbl_users")`). The prefix applies only to table names, not columns, indexes, or constraints.
 
 Repository query methods follow Spring Data naming: `findByX`, `existsByX`, `findByXAndY`.
 

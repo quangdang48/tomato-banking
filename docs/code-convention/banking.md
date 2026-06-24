@@ -77,7 +77,7 @@ Two concurrent withdrawals must never drive balance negative. Pick **one** strat
 
 ```java
 @Entity
-@Table(name = "accounts")
+@Table(name = "tbl_accounts")
 public class Account {
     @Version
     private Long version;

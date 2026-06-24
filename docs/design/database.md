@@ -7,79 +7,50 @@
 
 Money columns use `NUMERIC(19,4)` (maps to Java `BigDecimal`). Never `float`/`double`.
 
+## Naming
+
+All physical table names use the `tbl_` prefix (`@Table(name = "tbl_users")`). The prefix applies to table names only — columns, indexes, and constraints are unprefixed. The logical names used in the tables below (`users`, `customer_profiles`, …) omit the prefix for readability; the physical name is always `tbl_` + the logical name (e.g. `users` → `tbl_users`). See [code-convention/java.md](../code-convention/java.md#naming).
+
 ## ER diagram
 
 ```
 Banking core
 
-┌───────────────┐        ┌───────────────────┐        ┌──────────────────┐
-│     users     │ 1    * │     accounts      │ 1    * │   transactions   │
-├───────────────┤        ├───────────────────┤        ├──────────────────┤
-│ id PK         │───────<│ id PK             │───────<│ id PK            │
-│ username UK   │        │ user_id FK        │        │ account_id FK    │
-│ email UK      │        │ account_number UK │        │ type             │
-│ full_name     │        │ balance           │        │ amount           │
-│ password_hash │        │ currency          │        │ balance_after    │
-│ created_at    │        │ status            │        │ status           │
-└───────────────┘        │ version           │        │ reference_id UK  │
-                         │ created_at        │        │ created_at       │
-                         │ updated_at        │        └──────────────────┘
-                         └───────────────────┘
+┌────────────────┐          ┌────────────────────┐          ┌──────────────────┐
+│ users          │          │ accounts           │          │ transactions     │
+├────────────────┤          ├────────────────────┤          ├──────────────────┤
+│ id          PK │──1:N──<  │ id              PK │──1:N──<  │ id            PK │
+│ username    UK │          │ user_id         FK │          │ account_id    FK │
+│ email       UK │          │ account_number  UK │          │ reference_id  UK │
+└────────────────┘          └────────────────────┘          └──────────────────┘
+
 
 Onboarding verification
 
-┌───────────────┐        ┌──────────────────────┐
-│     users     │ 1    1 │  customer_profiles   │
-├───────────────┤        ├──────────────────────┤
-│ id PK         │───────<│ id PK                │
-│ username UK   │        │ user_id FK UK        │
-│ email UK      │        │ customer_type        │
-└───────────────┘        │ status               │
-                         │ risk_level           │
-                         │ submitted_at         │
-                         │ reviewed_at          │
-                         │ created_at           │
-                         │ updated_at           │
-                         └───┬─────────┬────────┬──────────────┐
-                             │ 1       │ 1      │ 1            │ 1
-                             │         │        │              │
-                             │ 0..1    │ 0..1   │ *            │ *
-                             ▼         ▼        ▼              ▼
-┌───────────────────┐ ┌───────────────────┐ ┌──────────────────────┐ ┌──────────────────────┐
-│ kyc_verifications │ │ kyb_verifications │ │verification_documents │ │ onboarding_audit_logs│
-├───────────────────┤ ├───────────────────┤ ├──────────────────────┤ ├──────────────────────┤
-│ id PK             │ │ id PK             │ │ id PK                │ │ id PK                │
-│ profile_id FK UK  │ │ profile_id FK UK  │ │ profile_id FK        │ │ profile_id FK        │
-│ legal_name        │ │ legal_business_nm │ │ owner_id FK nullable │ │ actor_user_id FK     │
-│ date_of_birth     │ │ registration_no   │ │ document_type        │ │ action               │
-│ document_type     │ │ tax_id            │ │ storage_key          │ │ old_status           │
-│ document_number   │ │ incorporation_dt  │ │ original_filename    │ │ new_status           │
-│ document_number   │ │ district          │ │ content_type         │ │ reason               │
-│ street_address    │ │ province_city     │ │ size_bytes           │ │ created_at           │
-│ status            │ │ created_at        │ │ status               │ └──────────────────────┘
-│ created_at        │ │ updated_at        │ │ rejection_reason     │
-│ updated_at        │ └─────────┬─────────┘ │ created_at           │
-└───────────────────┘           │ 1         │ updated_at           │
-                                │           └──────────────────────┘
-                                │ *
-                                ▼
-                      ┌────────────────────┐
-                      │ beneficial_owners  │
-                      ├────────────────────┤
-                      │ id PK              │
-                      │ kyb_verification_id│
-                      │ legal_name         │
-                      │ date_of_birth      │
-                      │ ownership_pct      │
-                      │ document_type      │
-                      │ document_number    │
-                      │ status             │
-                      │ created_at         │
-                      │ updated_at         │
-                      └────────────────────┘
+┌────────────────┐
+│ users          │
+├────────────────┤
+│ id          PK │
+└───────┬────────┘
+        │ 1:1
+        ▼
+┌───────────────────┐
+│ customer_profiles │
+├───────────────────┤
+│ id              PK│
+│ user_id      FK UK│
+└─────────┬─────────┘
+          │
+          ├──1:1──►  kyc_verifications        (profile_id FK UK)
+          ├──1:1──►  kyb_verifications        (profile_id FK UK)
+          ├──1:N──►  verification_documents   (profile_id FK · owner_id FK→beneficial_owners 0..1)
+          └──1:N──►  onboarding_audit_logs    (profile_id FK · actor_user_id FK→users)
+
+kyb_verifications  ──1:N──►  beneficial_owners   (kyb_verification_id FK)
 ```
 
-Legend: `PK` = primary key, `FK` = foreign key, `UK` = unique key.
+Legend: `PK` = primary key, `FK` = foreign key, `UK` = unique key. `1:N` parent→child,
+`1:1` one-to-one, `0..1` optional. The `<` / `►` head points at the child (many) side.
 
 ## Tables
 
