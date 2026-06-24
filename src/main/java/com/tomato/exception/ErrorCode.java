@@ -4,6 +4,8 @@ public enum ErrorCode {
     SUCCESS(0, "Success"),
     ERROR_400_4000(4000, "Bad request"),
     ERROR_400_VALIDATION(4001, "Validation failed"),
+    ERROR_401_2200(2200, "Invalid username or password"),
+    ERROR_401_2201(2201, "Invalid or expired token"),
     ERROR_404_2001(2001, "User not found"),
     ERROR_409_2002(2002, "Username already taken"),
     ERROR_409_2003(2003, "Email already in use"),

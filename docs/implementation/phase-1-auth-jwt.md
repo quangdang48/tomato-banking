@@ -121,37 +121,29 @@ HTTP status is decided):
 
 ## 4. DTOs
 
-Per [layers.md](../code-convention/layers.md): requests `@Getter @NoArgsConstructor` with
-Bean Validation; responses `@Getter @Builder` immutable with a static factory.
+Auth DTOs live under the auth module package. Requests use `dto.request`; responses use
+`dto.response`.
 
 ```java
-// dto/RegisterRequest.java   (POST /api/auth/register)
-@Getter
-@NoArgsConstructor
-public class RegisterRequest {
-    @NotBlank private String username;
-    @Email @NotBlank private String email;
-    private String fullName;
-    @NotBlank @Size(min = 8, max = 100) private String password;
-}
+// modules/auth/dto/request/RegisterRequest.java   (POST /api/auth/register)
+public record RegisterRequest(
+        @NotBlank String username,
+        @Email @NotBlank String email,
+        String fullName,
+        @NotBlank @Size(min = 8, max = 100) String password
+) {}
 
-// dto/LoginRequest.java      (POST /api/auth/login)
-@Getter
-@NoArgsConstructor
-public class LoginRequest {
-    @NotBlank private String username;
-    @NotBlank private String password;
-}
+// modules/auth/dto/request/LoginRequest.java      (POST /api/auth/login)
+public record LoginRequest(
+        @NotBlank String username,
+        @NotBlank String password
+) {}
 
-// dto/AuthResponse.java      (login response.data)
-@Getter
-@Builder
-public class AuthResponse {
-    private final String token;
-    private final long expiresIn;
+// modules/auth/dto/response/AuthResponse.java     (login response.data)
+public record AuthResponse(String token, long expiresIn) {
 
     public static AuthResponse of(String token, long expiresIn) {
-        return AuthResponse.builder().token(token).expiresIn(expiresIn).build();
+        return new AuthResponse(token, expiresIn);
     }
 }
 ```
@@ -167,10 +159,10 @@ Owns sign + parse. No business rules — used by `AuthService` (issue) and the f
 (validate).
 
 ```java
-package com.tomato.service;
+package com.tomato.modules.auth.service;
 
 import com.tomato.config.JwtProperties;
-import com.tomato.entity.User;
+import com.tomato.modules.user.entity.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -235,7 +227,8 @@ filter registration.
 ```java
 package com.tomato.config;
 
-import com.tomato.security.JwtAuthenticationFilter;
+import com.tomato.modules.auth.security.JwtAuthenticationFilter;
+import com.tomato.modules.auth.security.JwtAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -253,7 +246,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtAuthenticationFilter jwtFilter;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -272,16 +266,18 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())                 // stateless API, no cookies
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .exceptionHandling(e -> e.authenticationEntryPoint(jwtAuthenticationEntryPoint))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
                     "/api/auth/**",
-                    "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
-                    "/h2-console/**"
+                    "/v3/api-docs", "/v3/api-docs/**",
+                    "/swagger-ui/**", "/swagger-ui.html",
+                    "/h2-console", "/h2-console/**"
                 ).permitAll()
                 .anyRequest().authenticated()
             )
             .headers(h -> h.frameOptions(f -> f.sameOrigin()))   // H2 console renders in a frame
-            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 }
@@ -301,15 +297,18 @@ password, issue token). Throws `BusinessException` per
 [exception.md](../code-convention/exception.md).
 
 ```java
-package com.tomato.service;
+package com.tomato.modules.auth.service;
 
-import com.tomato.dto.AuthResponse;
-import com.tomato.dto.LoginRequest;
-import com.tomato.dto.RegisterRequest;
-import com.tomato.entity.User;
+import com.tomato.config.JwtProperties;
 import com.tomato.exception.BusinessException;
 import com.tomato.exception.ErrorCode;
-import com.tomato.repository.UserRepository;
+import com.tomato.modules.auth.dto.request.LoginRequest;
+import com.tomato.modules.auth.dto.request.RegisterRequest;
+import com.tomato.modules.auth.dto.response.AuthResponse;
+import com.tomato.modules.user.dto.request.CreateUserRequest;
+import com.tomato.modules.user.entity.User;
+import com.tomato.modules.user.repository.UserRepository;
+import com.tomato.modules.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -319,6 +318,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
+    private final UserService userService;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
@@ -327,28 +327,21 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public User register(RegisterRequest request) {
-        if (userRepository.existsByUsername(request.getUsername())) {
-            throw new BusinessException(ErrorCode.ERROR_409_2002);
-        }
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new BusinessException(ErrorCode.ERROR_409_2003);
-        }
-        User user = User.builder()
-                .username(request.getUsername())
-                .email(request.getEmail())
-                .fullName(request.getFullName())
-                .passwordHash(passwordEncoder.encode(request.getPassword()))   // bcrypt
-                .build();
-        return userRepository.save(user);
+        return userService.createUser(new CreateUserRequest(
+                request.username(),
+                request.email(),
+                request.fullName(),
+                request.password()
+        ));
     }
 
     @Override
     @Transactional(readOnly = true)
     public AuthResponse login(LoginRequest request) {
-        User user = userRepository.findByUsername(request.getUsername()).orElse(null);
+        User user = userRepository.findByUsername(request.username()).orElse(null);
         // Same error whether user missing or password wrong — no user enumeration.
         if (user == null
-                || !passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
+                || !passwordEncoder.matches(request.password(), user.getPasswordHash())) {
             throw new BusinessException(ErrorCode.ERROR_401_2200);
         }
         String token = jwtService.generate(user);
@@ -371,10 +364,11 @@ token → chain continues unauthenticated and the `authorizeHttpRequests` rule r
 protected routes with `401`.
 
 ```java
-package com.tomato.security;
+package com.tomato.modules.auth.security;
 
-import com.tomato.service.JwtService;
+import com.tomato.modules.auth.service.JwtService;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -394,7 +388,29 @@ import java.util.List;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
+    private static final String BEARER_PREFIX = "Bearer ";
+    private static final List<String> PUBLIC_PATHS = List.of(
+            "/api/auth",
+            "/v3/api-docs",
+            "/swagger-ui.html",
+            "/h2-console"
+    );
+    private static final List<String> PUBLIC_PATH_PREFIXES = List.of(
+            "/api/auth/",
+            "/v3/api-docs/",
+            "/swagger-ui/",
+            "/h2-console/"
+    );
+
     private final JwtService jwtService;
+    private final AuthErrorResponseWriter authErrorResponseWriter;
+
+    @Override
+    protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
+        String path = request.getServletPath();
+        return PUBLIC_PATHS.contains(path)
+                || PUBLIC_PATH_PREFIXES.stream().anyMatch(path::startsWith);
+    }
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
@@ -403,19 +419,32 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         String header = request.getHeader("Authorization");
-        if (header != null && header.startsWith("Bearer ")) {
-            String token = header.substring(7);
-            if (jwtService.isValid(token)) {
-                Claims claims = jwtService.parse(token);
-                var authentication = new UsernamePasswordAuthenticationToken(
-                        claims.getSubject(),        // principal = username
-                        null,
-                        List.of());                 // no roles in phase 1
-                authentication.setDetails(
-                        new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-            }
+        if (header == null || header.isBlank()) {
+            chain.doFilter(request, response);
+            return;
         }
+
+        if (!header.startsWith(BEARER_PREFIX)) {
+            SecurityContextHolder.clearContext();
+            authErrorResponseWriter.writeUnauthorized(response);
+            return;
+        }
+
+        try {
+            Claims claims = jwtService.parse(header.substring(BEARER_PREFIX.length()));
+            var authentication = new UsernamePasswordAuthenticationToken(
+                    claims.getSubject(),        // principal = username
+                    null,
+                    List.of());                 // no roles in phase 1
+            authentication.setDetails(
+                    new WebAuthenticationDetailsSource().buildDetails(request));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+        } catch (JwtException | IllegalArgumentException ex) {
+            SecurityContextHolder.clearContext();
+            authErrorResponseWriter.writeUnauthorized(response);
+            return;
+        }
+
         chain.doFilter(request, response);
     }
 }
@@ -424,6 +453,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 > The principal is the **username** from the verified token — `uid` claim is available via
 > `claims.get("uid")` for ownership checks when account endpoints arrive. Never trust an id
 > from the request body for identity.
+> Missing tokens are handled by `JwtAuthenticationEntryPoint`; malformed, expired, or
+> tampered bearer tokens are written by `AuthErrorResponseWriter`. Both paths return
+> HTTP 401 with `ERROR_401_2201`.
 
 ---
 
@@ -433,14 +465,14 @@ HTTP only: validate, call service, wrap in `ApiResponse`. Never catches
 `BusinessException`.
 
 ```java
-package com.tomato.controller;
+package com.tomato.modules.auth.controller;
 
 import com.tomato.common.ApiResponse;
-import com.tomato.dto.AuthResponse;
-import com.tomato.dto.LoginRequest;
-import com.tomato.dto.RegisterRequest;
-import com.tomato.dto.UserResponse;
-import com.tomato.service.AuthService;
+import com.tomato.modules.auth.dto.request.LoginRequest;
+import com.tomato.modules.auth.dto.request.RegisterRequest;
+import com.tomato.modules.auth.dto.response.AuthResponse;
+import com.tomato.modules.auth.service.AuthService;
+import com.tomato.modules.user.dto.response.UserResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -509,16 +541,18 @@ com.tomato.Main                                 + @ConfigurationPropertiesScan
 com.tomato.config.JwtProperties                 NEW  typed config
 com.tomato.config.SecurityConfig                NEW  filter chain, encoder, manager
 com.tomato.config.SwaggerConfig                 ~    bearer security scheme
-com.tomato.security.JwtAuthenticationFilter     NEW  per-request token validation
-com.tomato.service.JwtService                   NEW  sign / parse / verify
-com.tomato.service.AuthService (+Impl)          NEW  register + login
-com.tomato.controller.AuthController            NEW  /api/auth/register, /login
-com.tomato.dto.RegisterRequest                  NEW
-com.tomato.dto.LoginRequest                     NEW
-com.tomato.dto.AuthResponse                     NEW
+com.tomato.modules.auth.security.AuthErrorResponseWriter    NEW  401 envelope writer
+com.tomato.modules.auth.security.JwtAuthenticationEntryPoint NEW  missing-token 401
+com.tomato.modules.auth.security.JwtAuthenticationFilter     NEW  per-request token validation
+com.tomato.modules.auth.service.JwtService                   NEW  sign / parse / verify
+com.tomato.modules.auth.service.AuthService (+Impl)          NEW  register + login
+com.tomato.modules.auth.controller.AuthController            NEW  /api/auth/register, /login
+com.tomato.modules.auth.dto.request.RegisterRequest          NEW
+com.tomato.modules.auth.dto.request.LoginRequest             NEW
+com.tomato.modules.auth.dto.response.AuthResponse            NEW
 com.tomato.exception.ErrorCode                  ~    + 2200, 2201
 com.tomato.exception.GlobalExceptionHandler     ~    + 401 mapping
-com.tomato.service.UserServiceImpl              ~    bcrypt-hash password (close gap §0)
+com.tomato.modules.user.service.UserServiceImpl ~    bcrypt-hash password (close gap §0)
 ```
 
 ---

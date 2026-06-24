@@ -13,7 +13,7 @@ All responses use the `ApiResponse` envelope:
 }
 ```
 
-`code` follows `ErrorCode` (`com.dumy.exception.ErrorCode`); `0` = success.
+`code` follows `ErrorCode` (`com.tomato.exception.ErrorCode`); `0` = success.
 
 ## Endpoints
 

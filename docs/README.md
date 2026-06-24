@@ -33,7 +33,7 @@ Portfolio banking REST API built with Spring Boot. This folder holds the design 
 
 ## Quick facts
 
-- **Group / base package**: `com.dumy`
+- **Group / base package**: `com.tomato`
 - **Java**: 21
 - **Spring Boot**: 3.3.8
 - **DB (dev)**: H2 in-memory (`jdbc:h2:mem:dumydb`)

@@ -162,38 +162,28 @@ public class Account {
 **Job:** the HTTP contract. Decouples API shape from the DB schema.
 
 Rules:
-- **Request DTO:** `@Getter @NoArgsConstructor`, mutable (Jackson deserializes). Bean Validation annotations here (`@NotBlank`, `@Email`, `@Positive`).
-- **Response DTO:** `@Getter @Builder`, immutable `final` fields, with a static `from(Entity)` factory.
+- **Request DTO:** record preferred for new code; Bean Validation annotations live on record components (`@NotBlank`, `@Email`, `@Positive`).
+- **Response DTO:** record preferred for new code; include a static `from(Entity)` factory when mapping from an entity.
 - Never expose `passwordHash` or other sensitive fields in a response DTO.
 - One DTO per use case — don't reuse a request DTO as a response.
 
 ```java
 // Request
-@Getter
-@NoArgsConstructor
-public class CreateUserRequest {
-    @NotBlank private String username;
-    @Email @NotBlank private String email;
-    private String fullName;
-    @NotBlank @Size(min = 8) private String password;
-}
+public record CreateUserRequest(
+    @NotBlank String username,
+    @Email @NotBlank String email,
+    String fullName,
+    @NotBlank @Size(min = 8) String password
+) {}
 
 // Response
-@Getter
-@Builder
-public class UserResponse {
-    private final Integer id;
-    private final String username;
-    private final String email;
-    private final String fullName;
-
+public record UserResponse(Integer id, String username, String email, String fullName) {
     public static UserResponse from(User user) {
-        return UserResponse.builder()
-            .id(user.getId())
-            .username(user.getUsername())
-            .email(user.getEmail())
-            .fullName(user.getFullName())
-            .build();
+        return new UserResponse(
+            user.getId(),
+            user.getUsername(),
+            user.getEmail(),
+            user.getFullName());
     }
 }
 ```

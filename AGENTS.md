@@ -4,7 +4,7 @@ Guidance for AI agents working in this repo. Read the relevant docs **before** w
 
 ## Project
 
-Tomato Banking — portfolio banking REST API. Spring Boot 3.3.8, Java 21, base package `com.dumy`. Port 8088. H2 (dev) → PostgreSQL (target). Money correctness is the central design constraint: every balance change is transactional, audited, idempotent, and concurrency-safe.
+Tomato Banking — portfolio banking REST API. Spring Boot 3.3.8, Java 21, base package `com.tomato`. Port 8088. H2 (dev) → PostgreSQL (target). Money correctness is the central design constraint: every balance change is transactional, audited, idempotent, and concurrency-safe.
 
 ## Documentation map
 
@@ -23,6 +23,7 @@ Index: [docs/README.md](docs/README.md).
 - [layers.md](docs/code-convention/layers.md) — controller / service / repository / entity / DTO rules.
 - [banking.md](docs/code-convention/banking.md) — money, transactions, concurrency, idempotency.
 - [best-practices.md](docs/code-convention/best-practices.md) — security, validation, logging, testing, performance.
+- [testing.md](docs/code-convention/testing.md) — JUnit naming, display names, and test structure.
 
 ### Tests
 - [k6-test/](k6-test/) — k6 load/concurrency tests for the lock strategies.

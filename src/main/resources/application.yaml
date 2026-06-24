@@ -1,6 +1,12 @@
 server:
   port: 8088
 
+app:
+  jwt:
+    secret: ${JWT_SECRET:change-me-dev-only-min-32-bytes-long-secret}
+    expires-in: 3600
+    issuer: tomato-banking
+
 spring:
   datasource:
     url: jdbc:h2:mem:tomatodb;DB_CLOSE_DELAY=-1

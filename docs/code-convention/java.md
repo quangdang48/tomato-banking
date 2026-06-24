@@ -5,18 +5,22 @@ General Java style for this codebase. For layer-specific rules see [layers.md](l
 ## Package layout
 
 ```
-com.dumy
-├── common/        ApiResponse (shared across all layers)
-├── config/        Spring config beans (Swagger, ThreadPool, Security)
-├── controller/    REST endpoints
-├── service/       Business logic — interface + *Impl
-├── repository/    Spring Data JPA interfaces
-├── entity/        JPA entities
-├── dto/           Request/response DTOs
-└── exception/     ErrorCode, BusinessException, GlobalExceptionHandler, ObjectsValidator
+com.tomato
+├── common/        ApiResponse (shared across all modules)
+├── config/        Cross-module Spring config beans
+├── exception/     ErrorCode, BusinessException, GlobalExceptionHandler, ObjectsValidator
+└── modules/
+    └── {module}/
+        ├── controller/  REST endpoints
+        ├── service/     Business logic — interface + *Impl
+        ├── repository/  Spring Data JPA interfaces
+        ├── entity/      JPA entities
+        └── dto/
+            ├── request/
+            └── response/
 ```
 
-Dependency direction is one-way: `controller → service → repository → entity`. DTO ↔ entity mapping lives in the DTO (`from(entity)` factory) or service. **Entities never depend on DTOs.**
+Dependency direction is one-way inside each module: `controller → service → repository → entity`. DTO ↔ entity mapping lives in the response DTO (`from(entity)` factory) or service. **Entities never depend on DTOs.** Cross-module dependencies should go through another module's service interface unless a lower-level dependency is explicitly part of the design.
 
 ---
 
@@ -32,7 +36,7 @@ Dependency direction is one-way: `controller → service → repository → enti
 | Constant / enum entry | UPPER_SNAKE                | `ERROR_404_2001`             |
 | DB table              | snake_case, plural         | `users`, `accounts`          |
 | DB column             | snake_case                 | `full_name`, `password_hash` |
-| Package               | all lowercase              | `com.dumy.service`           |
+| Package               | all lowercase              | `com.tomato.modules.user.service` |
 | Boolean method        | `is`/`has`/`exists` prefix | `existsByUsername`           |
 
 Repository query methods follow Spring Data naming: `findByX`, `existsByX`, `findByXAndY`.
@@ -66,20 +70,19 @@ Entity pattern:
 public class User { ... }
 ```
 
-Request DTO (mutable, deserialized by Jackson):
+Request DTO (records are preferred for new DTOs):
 
 ```java
-@Getter
-@NoArgsConstructor
-public class CreateUserRequest { ... }
+public record CreateUserRequest(
+    @NotBlank String username,
+    @Email @NotBlank String email
+) {}
 ```
 
-Response DTO (immutable, built from an entity):
+Response DTO (record with an entity factory):
 
 ```java
-@Getter
-@Builder
-public class UserResponse {
+public record UserResponse(Integer id, String username, String email) {
     public static UserResponse from(User user) { ... }
 }
 ```
@@ -136,7 +139,7 @@ UserResponse.builder().id(user.getId()).email(user.getEmail())...
 ## Imports
 
 - No wildcard imports (`import x.*`). Import each type explicitly.
-- Group: java/jakarta std, third-party, then `com.dumy.*`.
+- Group: java/jakarta std, third-party, then `com.tomato.*`.
 
 ---
 

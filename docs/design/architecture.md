@@ -123,15 +123,23 @@ Cross-cutting (all layers):
 ## Package layout
 
 ```
-com.dumy
-├── config/        SwaggerConfig, ThreadPoolConfig, (SecurityConfig planned)
-├── controller/    UserController, (AccountController, AuthController planned)
-├── service/       UserService(+Impl), (AccountService, TransactionService planned)
-├── repository/    UserRepository, (AccountRepository, TransactionRepository planned)
-├── entity/        User, (Account, Transaction planned)
-├── dto/           CreateUserRequest, UpdateUserRequest, UserResponse, ...
+com.tomato
 ├── common/        ApiResponse (uniform envelope)
+├── config/        SwaggerConfig, ThreadPoolConfig, JwtProperties
 ├── exception/     GlobalExceptionHandler, BusinessException, ErrorCode, ObjectsValidator
+├── modules/
+│   ├── auth/
+│   │   ├── config/      PasswordEncoderConfig
+│   │   ├── controller/  AuthController
+│   │   ├── dto/         request/, response/
+│   │   ├── security/    JwtAuthenticationFilter
+│   │   └── service/     AuthService(+Impl), JwtService
+│   └── user/
+│       ├── controller/  UserController
+│       ├── dto/         request/, response/
+│       ├── entity/      User
+│       ├── repository/  UserRepository
+│       └── service/     UserService(+Impl)
 └── Main.java
 ```
 

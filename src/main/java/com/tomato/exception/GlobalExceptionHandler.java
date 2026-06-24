@@ -18,14 +18,12 @@ public class GlobalExceptionHandler {
         ErrorCode errorCode = ex.getErrorCode();
         String message = ex.getMessage();
 
-        HttpStatus status;
-        if (errorCode == ErrorCode.ERROR_404_2001) {
-            status = HttpStatus.NOT_FOUND;
-        } else if (errorCode == ErrorCode.ERROR_409_2002 || errorCode == ErrorCode.ERROR_409_2003) {
-            status = HttpStatus.CONFLICT;
-        } else {
-            status = HttpStatus.BAD_REQUEST;
-        }
+        HttpStatus status = switch (errorCode) {
+            case ERROR_401_2200, ERROR_401_2201 -> HttpStatus.UNAUTHORIZED;
+            case ERROR_404_2001 -> HttpStatus.NOT_FOUND;
+            case ERROR_409_2002, ERROR_409_2003 -> HttpStatus.CONFLICT;
+            default -> HttpStatus.BAD_REQUEST;
+        };
 
         return new ResponseEntity<>(ApiResponse.error(errorCode, message), status);
     }

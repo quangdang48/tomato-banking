@@ -9,6 +9,7 @@ Rules derived from the actual codebase. New code must follow these or update the
 | [layers.md](layers.md) | Layer responsibilities — controller, service, repository, entity, DTO |
 | [banking.md](banking.md) | Money correctness, transactions, concurrency, idempotency |
 | [best-practices.md](best-practices.md) | General backend best practices — security, validation, logging, testing, performance |
+| [testing.md](testing.md) | JUnit naming, display names, and test structure |
 
 ## Non-negotiables
 

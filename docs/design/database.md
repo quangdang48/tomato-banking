@@ -84,7 +84,7 @@ Legend: `PK` = primary key, `FK` = foreign key, `UK` = unique key.
 ## Tables
 
 ### users
-Maps to existing `User` entity (`com.dumy.entity.User`).
+Maps to existing `User` entity (`com.tomato.modules.user.entity.User`).
 
 | Column | Type | Constraints |
 |--------|------|-------------|
